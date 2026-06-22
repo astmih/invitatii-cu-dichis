@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invitații cu Dichis — by Ale</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <img src="logo.jpg" alt="Invitații cu Dichis by Ale" class="logo" />
+      <nav>
+        <a href="#" class="active">Acasă</a>
+        <a href="#produse">Produse</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Invitații cu Dichis by Ale</h1>
+    <div class="gold-divider"></div>
+    <p>Invitații elegante pentru cele mai speciale momente din viața ta</p>
+  </section>
+
+  <!-- PRODUSE -->
+  <section class="products-section" id="produse">
+    <div class="container">
+      <h2 class="section-title">Colecția Noastră</h2>
+      <p class="section-sub">Alege din gama noastră de invitații și plicuri</p>
+      <div class="gold-divider" style="margin-bottom:36px;"></div>
+
+      <div class="filter-tabs" id="filterTabs"></div>
+
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section" id="contact">
+    <div class="container">
+      <h2 class="section-title">Contact</h2>
+      <div class="gold-divider"></div>
+      <p class="contact-text">Pentru comenzi și informații, ne poți contacta pe:</p>
+      <div class="contact-links">
+        <a href="#" id="linkWA" class="contact-btn" target="_blank" rel="noopener">📱 WhatsApp</a>
+        <a href="#" id="linkFB" class="contact-btn" target="_blank" rel="noopener">📘 Facebook</a>
+        <a href="#" id="linkIG" class="contact-btn" target="_blank" rel="noopener">📸 Instagram</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Invitații cu Dichis by Ale &nbsp;·&nbsp; Toate drepturile rezervate</p>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+    <button class="lb-close" onclick="closeLightbox(event)">✕</button>
+    <button id="lbPrev" class="lb-nav lb-prev" onclick="lbNav(-1)">&#8249;</button>
+    <div class="lb-img-wrap">
+      <img id="lbImg" class="lb-img" alt="" />
+    </div>
+    <button id="lbNext" class="lb-nav lb-next" onclick="lbNav(1)">&#8250;</button>
+    <div id="lbDots" class="lb-dots"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

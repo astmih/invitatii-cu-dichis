@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Invitații cu Dichis</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-page">
+
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <img src="logo.jpg" alt="Logo" class="login-logo" />
+      <h2>Panou Admin</h2>
+      <p>Introdu numele și parola pentru a continua</p>
+      <input type="text" id="loginUser" class="login-input" placeholder="Nume utilizator" autocomplete="username" />
+      <input type="password" id="loginInput" class="login-input" placeholder="Parolă" autocomplete="current-password" />
+      <button class="login-btn" onclick="doLogin()">Intră</button>
+      <p class="login-error" id="loginError">Nume sau parolă incorectă. Încearcă din nou.</p>
+    </div>
+  </div>
+
+  <!-- ADMIN UI -->
+  <div id="adminUI" style="display:none;">
+
+    <div class="admin-header-bar">
+      <img src="logo.jpg" alt="Logo" class="logo" />
+      <span class="admin-bar-title">Panou de Administrare</span>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span id="loggedInAs" style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--text-medium);"></span>
+        <a href="index.html">← Vezi site-ul</a>
+        <a href="#" onclick="doLogout()" style="color:var(--text-light);">Ieși</a>
+      </div>
+    </div>
+
+    <div id="firebaseDiag" class="firebase-diag">🔄 Testez conexiunea Firebase...</div>
+
+    <div class="admin-body">
+
+      <!-- COLOANA STÂNGA: Formular produs + Categorii -->
+      <div class="left-col">
+
+        <!-- FORMULAR PRODUS -->
+        <div class="form-card">
+          <h3 id="formTitle">Adaugă Produs</h3>
+          <input type="hidden" id="editId" />
+
+          <div class="form-group">
+            <label>Nume produs *</label>
+            <input type="text" id="fName" placeholder="ex: Invitație Elegance Roz" />
+          </div>
+
+          <div class="form-group">
+            <label>Categorie *</label>
+            <select id="fCategory"></select>
+          </div>
+
+          <div class="form-group">
+            <label>Preț (lei / buc) *</label>
+            <input type="number" id="fPrice" placeholder="ex: 12" min="0" step="0.5" />
+          </div>
+
+          <div class="form-group">
+            <label>Descriere</label>
+            <textarea id="fDesc" placeholder="Detalii despre produs, materiale, dimensiuni..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Fotografii produs (max. 4)</label>
+            <div class="img-slots-grid">
+              <div class="img-slot" id="slot0">
+                <input type="file" id="fImage0" accept="image/*" onchange="previewSlot(this,0)" />
+                <label for="fImage0" class="slot-add-label"><span class="slot-plus">+</span>Foto 1</label>
+                <img id="imgPreview0" class="slot-img" style="display:none" alt="" />
+                <button type="button" class="slot-clear" onclick="clearSlot(0)" style="display:none">✕</button>
+              </div>
+              <div class="img-slot" id="slot1">
+                <input type="file" id="fImage1" accept="image/*" onchange="previewSlot(this,1)" />
+                <label for="fImage1" class="slot-add-label"><span class="slot-plus">+</span>Foto 2</label>
+                <img id="imgPreview1" class="slot-img" style="display:none" alt="" />
+                <button type="button" class="slot-clear" onclick="clearSlot(1)" style="display:none">✕</button>
+              </div>
+              <div class="img-slot" id="slot2">
+                <input type="file" id="fImage2" accept="image/*" onchange="previewSlot(this,2)" />
+                <label for="fImage2" class="slot-add-label"><span class="slot-plus">+</span>Foto 3</label>
+                <img id="imgPreview2" class="slot-img" style="display:none" alt="" />
+                <button type="button" class="slot-clear" onclick="clearSlot(2)" style="display:none">✕</button>
+              </div>
+              <div class="img-slot" id="slot3">
+                <input type="file" id="fImage3" accept="image/*" onchange="previewSlot(this,3)" />
+                <label for="fImage3" class="slot-add-label"><span class="slot-plus">+</span>Foto 4</label>
+                <img id="imgPreview3" class="slot-img" style="display:none" alt="" />
+                <button type="button" class="slot-clear" onclick="clearSlot(3)" style="display:none">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-save" onclick="saveProduct()">Salvează Produsul</button>
+          <button class="btn-cancel-edit" id="btnCancel" onclick="cancelEdit()">Anulează editarea</button>
+        </div>
+
+        <!-- CONTACT & SOCIAL MEDIA -->
+        <div class="form-card" style="margin-top:24px;">
+          <h3>Contact & Social Media</h3>
+
+          <div class="form-group">
+            <label>📱 Număr WhatsApp</label>
+            <input type="tel" id="cPhone" placeholder="ex: 0712 345 678" />
+          </div>
+
+          <div class="form-group">
+            <label>📘 Link pagină Facebook</label>
+            <input type="url" id="cFacebook" placeholder="ex: https://facebook.com/paginata" />
+          </div>
+
+          <div class="form-group">
+            <label>📸 Link profil Instagram</label>
+            <input type="url" id="cInstagram" placeholder="ex: https://instagram.com/contul_tau" />
+          </div>
+
+          <button class="btn-save" onclick="saveContact()">Salvează Datele de Contact</button>
+        </div>
+
+        <!-- GESTIONARE CATEGORII -->
+        <div class="form-card" style="margin-top:24px;">
+          <h3>Categorii</h3>
+
+          <div class="cat-add-row">
+            <input type="text" id="newCatLabel" class="cat-input" placeholder="Nume categorie nouă" />
+            <input type="text" id="newCatIcon"  class="cat-input cat-icon-input" placeholder="Emoji (opțional)" maxlength="4" />
+            <button class="btn-add-cat" onclick="addCategory()">+ Adaugă</button>
+          </div>
+
+          <div id="categoryList" class="category-list"></div>
+        </div>
+
+        <!-- TIPURI DE HÂRTIE -->
+        <div class="form-card" style="margin-top:24px;">
+          <h3>Tipuri de Hârtie</h3>
+          <p class="paper-hint">Adaugă tipuri de hârtie și adaosul de preț per bucată față de prețul de bază al produsului.</p>
+
+          <div class="cat-add-row">
+            <input type="text" id="newPaperName" class="cat-input" placeholder="ex: Premium Matt" />
+            <input type="number" id="newPaperIncrease" class="cat-input" placeholder="+lei/buc" min="0" step="0.5" style="max-width:100px;" />
+            <button class="btn-add-cat" onclick="addPaperType()">+ Adaugă</button>
+          </div>
+
+          <div id="paperTypeList" class="category-list"></div>
+        </div>
+
+      </div>
+
+      <!-- COLOANA DREAPTA: Lista produse -->
+      <div class="products-list-card">
+        <h3>Produsele Mele</h3>
+        <div id="adminList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
