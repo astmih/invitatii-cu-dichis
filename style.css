@@ -507,8 +507,16 @@ footer {
 @media (max-width: 580px) {
   .products-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 2.8rem; }
-  nav { gap: 16px; }
   .header-inner { padding: 10px 16px; }
+  .nav-row {
+    gap: 6px 16px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+  .nav-row a {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+  }
 }
 
 /* ══════════════════════════════
