@@ -83,6 +83,7 @@ function buildFilterTabs() {
       btn.classList.add('active');
       buildSubFilterTabs();
       renderProducts();
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
@@ -104,9 +105,12 @@ function buildSubFilterTabs() {
     container.innerHTML = '';
     return;
   }
+  const showToate = currentFilter === 'nunta';
+  if (!currentSubFilter) currentSubFilter = showToate ? '' : subs[0].id;
+
   container.style.display = 'flex';
   container.innerHTML =
-    `<button class="sub-tab ${!currentSubFilter ? 'active' : ''}" data-sub="">Toate</button>` +
+    (showToate ? `<button class="sub-tab ${!currentSubFilter ? 'active' : ''}" data-sub="">Toate</button>` : '') +
     subs.map(s =>
       `<button class="sub-tab ${currentSubFilter === s.id ? 'active' : ''}" data-sub="${escHtml(s.id)}">${escHtml(s.label)}</button>`
     ).join('');
@@ -116,6 +120,7 @@ function buildSubFilterTabs() {
       container.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       renderProducts();
+      document.getElementById('filterTabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 }
