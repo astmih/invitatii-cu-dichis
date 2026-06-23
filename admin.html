@@ -53,7 +53,12 @@
 
           <div class="form-group">
             <label>Categorie *</label>
-            <select id="fCategory"></select>
+            <select id="fCategory" onchange="buildSubcategorySelect()"></select>
+          </div>
+
+          <div class="form-group" id="fSubcategoryGroup" style="display:none;">
+            <label>Subcategorie</label>
+            <select id="fSubcategory"></select>
           </div>
 
           <div class="form-group">
@@ -159,6 +164,14 @@
 
     </div>
 
+    <!-- ORDERS MANAGEMENT -->
+    <div class="admin-orders-wrap">
+      <div class="products-list-card">
+        <h3>Comenzi Primite <span class="orders-new-badge" id="ordersNewBadge" style="display:none;">0</span></h3>
+        <div id="adminOrderList"></div>
+      </div>
+    </div>
+
     <!-- FEEDBACK MANAGEMENT -->
     <div class="admin-feedback-wrap">
       <div class="products-list-card">
@@ -172,6 +185,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="form-packages.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

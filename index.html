@@ -37,6 +37,7 @@
       <div class="gold-divider" style="margin-bottom:36px;"></div>
 
       <div class="filter-tabs" id="filterTabs"></div>
+      <div class="sub-filter-tabs" id="subFilterTabs" style="display:none;"></div>
 
       <div class="products-grid" id="productsGrid"></div>
     </div>
@@ -86,6 +87,41 @@
     <p>© 2026 Invitații cu Dichis by Ale &nbsp;·&nbsp; Toate drepturile rezervate</p>
   </footer>
 
+  <!-- COȘ FAB -->
+  <button class="cart-fab" id="cartFab" onclick="openCart()" style="display:none;" aria-label="Coș cumpărături">
+    🛒
+    <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+  </button>
+
+  <!-- PANEL COȘ -->
+  <div class="cart-overlay" id="cartModal" onclick="closeCartOnOverlay(event)">
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h3>Coșul Meu</h3>
+        <button class="cart-close" onclick="closeCart()">✕</button>
+      </div>
+      <div class="cart-body" id="cartItems"></div>
+      <div class="cart-footer" id="cartFooter" style="display:none;">
+        <div class="cart-total-row">
+          <span>Total estimat:</span>
+          <strong id="cartTotal">0 lei</strong>
+        </div>
+        <button class="btn-checkout" onclick="openOrderForm()">Spre comandă →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL COMANDĂ -->
+  <div class="order-overlay" id="orderModal" onclick="closeOrderOnOverlay(event)">
+    <div class="order-panel">
+      <div class="order-header">
+        <h3 id="orderTitle">Finalizează Comanda</h3>
+        <button class="order-close" onclick="closeOrderForm()">✕</button>
+      </div>
+      <div class="order-body" id="orderBody"></div>
+    </div>
+  </div>
+
   <!-- LIGHTBOX -->
   <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
     <button class="lb-close" onclick="closeLightbox(event)">✕</button>
@@ -100,6 +136,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="form-packages.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

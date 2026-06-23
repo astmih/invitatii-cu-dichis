@@ -17,6 +17,8 @@ const DEFAULT_CATEGORIES  = [
 ];
 const DEFAULT_PAPER_TYPES = [];
 
+let adminCats = [...DEFAULT_CATEGORIES];
+
 // Imaginile curente per slot (base64) pentru produsul aflat în editare
 let slotData = ['', '', '', ''];
 
@@ -63,6 +65,7 @@ async function showAdmin(username) {
     loadContactForm(),
     renderPaperTypeList(),
     renderAdminFeedbackList(),
+    renderAdminOrderList(),
   ]);
 }
 
@@ -137,7 +140,8 @@ async function saveContact() {
 async function getCategories() {
   try {
     const data = await fsGet('config/categories');
-    return data?.items ? [...data.items] : [...DEFAULT_CATEGORIES];
+    adminCats = data?.items ? [...data.items] : [...DEFAULT_CATEGORIES];
+    return adminCats;
   } catch (e) {
     console.error('getCategories:', e);
     return [...DEFAULT_CATEGORIES];
@@ -154,7 +158,24 @@ async function buildCategorySelect() {
     document.getElementById('fCategory').innerHTML = cats.map(c =>
       `<option value="${escHtml(c.id)}">${escHtml(c.label)}</option>`
     ).join('');
+    buildSubcategorySelect();
   } catch (e) { console.error('buildCategorySelect:', e); }
+}
+
+function buildSubcategorySelect() {
+  const catId = document.getElementById('fCategory').value;
+  const cat   = adminCats.find(c => c.id === catId);
+  const subs  = cat?.subcategories || [];
+  const group = document.getElementById('fSubcategoryGroup');
+  const sel   = document.getElementById('fSubcategory');
+  if (subs.length === 0) {
+    group.style.display = 'none';
+    sel.innerHTML = '';
+  } else {
+    group.style.display = 'block';
+    sel.innerHTML = `<option value="">Fără subcategorie</option>` +
+      subs.map(s => `<option value="${escHtml(s.id)}">${escHtml(s.label)}</option>`).join('');
+  }
 }
 
 async function addCategory() {
@@ -199,14 +220,218 @@ async function deleteCategory(id) {
 
 async function renderCategoryList() {
   try {
-    const cats = await getCategories();
-    document.getElementById('categoryList').innerHTML = cats.map(c => `
-      <div class="cat-item">
-        <span class="cat-icon">${c.icon}</span>
-        <span class="cat-label">${escHtml(c.label)}</span>
-        <button class="btn-delete-cat" onclick="deleteCategory('${escHtml(c.id)}')">Șterge</button>
-      </div>`).join('');
+    const [cats, types] = await Promise.all([getCategories(), getPaperTypes()]);
+
+    const PKG_OPTS = [
+      { value: 'nunta',  label: '💍 Invitații Nuntă' },
+      { value: 'botez',  label: '👶 Invitații Botez' },
+      { value: 'simplu', label: '📋 Simplu (Nume + Info)' },
+      { value: 'none',   label: '— Fără formular' },
+    ];
+
+    function pkgOptions(current, withInherit, inheritLabel) {
+      let html = withInherit
+        ? `<option value="" ${current === '' ? 'selected' : ''}>↑ Același ca ${escHtml(inheritLabel)}</option>`
+        : '';
+      html += PKG_OPTS.map(o =>
+        `<option value="${o.value}" ${current === o.value ? 'selected' : ''}>${o.label}</option>`
+      ).join('');
+      return html;
+    }
+
+    function extrasChecks(allowedExtras, containerId, onchangeFn) {
+      if (types.length === 0) return '';
+      const checks = types.map(t => {
+        const checked = !allowedExtras || allowedExtras.includes(t.id) ? 'checked' : '';
+        return `<label class="extras-check-item">
+          <input type="checkbox" value="${escHtml(t.id)}" ${checked} onchange="${onchangeFn}" />
+          ${escHtml(t.name)}
+        </label>`;
+      }).join('');
+      return `<div class="cat-extras-config" id="${containerId}">
+        <span class="extras-config-label">Extra opțiuni permise:</span>
+        <div class="extras-check-list">${checks}</div>
+      </div>`;
+    }
+
+    function subExtrasChecks(allowedExtras, containerId, onchangeFn) {
+      if (types.length === 0) return '';
+      const checks = types.map(t => {
+        const checked = !allowedExtras || allowedExtras.includes(t.id) ? 'checked' : '';
+        return `<label class="extras-check-item">
+          <input type="checkbox" value="${escHtml(t.id)}" ${checked} onchange="${onchangeFn}" />
+          ${escHtml(t.name)}
+        </label>`;
+      }).join('');
+      return `<div class="subcat-extras-config" id="${containerId}">
+        <span class="extras-config-label">Extra opțiuni:</span>
+        <div class="extras-check-list">${checks}</div>
+      </div>`;
+    }
+
+    document.getElementById('categoryList').innerHTML = cats.map(c => {
+      const catPkg    = c.formPackage !== undefined ? c.formPackage : getCatDefaultPkg(c.id);
+      const subs      = c.subcategories || [];
+
+      const subsHtml = subs.map(s => {
+        const subPkg = s.formPackage !== undefined ? s.formPackage : '';
+        return `
+          <div class="subcat-item">
+            <span class="subcat-bullet">—</span>
+            <span class="subcat-label">${escHtml(s.label)}</span>
+            <button class="btn-delete-subcat" onclick="deleteSubcategory('${escHtml(c.id)}','${escHtml(s.id)}')">✕</button>
+          </div>
+          <div class="subcat-pkg-row" id="subPkg_${escHtml(c.id)}_${escHtml(s.id)}">
+            <span class="subcat-pkg-label">📄 Formular:</span>
+            <select class="cat-package-select subcat-pkg-select" onchange="saveSubcategoryPackage('${escHtml(c.id)}','${escHtml(s.id)}')">
+              ${pkgOptions(subPkg, true, c.label)}
+            </select>
+          </div>
+          ${subExtrasChecks(s.allowedExtras, `subExtras_${escHtml(c.id)}_${escHtml(s.id)}`, `saveSubcategoryExtras('${escHtml(c.id)}','${escHtml(s.id)}')`)}`;
+      }).join('');
+
+      return `
+        <div class="cat-item-wrap">
+          <div class="cat-item">
+            <span class="cat-icon">${c.icon}</span>
+            <span class="cat-label">${escHtml(c.label)}</span>
+            <button class="btn-delete-cat" onclick="deleteCategory('${escHtml(c.id)}')">Șterge</button>
+          </div>
+          <div class="cat-package-row" id="catPkg_${escHtml(c.id)}">
+            <span class="cat-package-label">📄 Formular comandă:</span>
+            <select class="cat-package-select" onchange="saveCategoryPackage('${escHtml(c.id)}')">
+              ${pkgOptions(catPkg, false, '')}
+            </select>
+          </div>
+          ${extrasChecks(c.allowedExtras, `catExtras_${escHtml(c.id)}`, `saveCategoryExtras('${escHtml(c.id)}')`)}
+          <div class="subcat-section">
+            ${subsHtml}
+            <div class="subcat-add-row">
+              <input type="text" class="cat-input subcat-input" id="newSub_${escHtml(c.id)}" placeholder="Subcategorie nouă…" />
+              <button class="btn-add-subcat" onclick="addSubcategory('${escHtml(c.id)}')">+ Sub</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
   } catch (e) { console.error('renderCategoryList:', e); }
+}
+
+async function saveCategoryPackage(catId) {
+  const container = document.getElementById('catPkg_' + catId);
+  const sel = container?.querySelector('select');
+  if (!sel) return;
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    cat.formPackage = sel.value;
+    await saveCategories(cats);
+    showToast('Formular salvat!');
+  } catch (e) {
+    showToast('Eroare. Verifică Firebase.');
+    console.error('saveCategoryPackage:', e);
+  }
+}
+
+async function saveSubcategoryPackage(catId, subId) {
+  const container = document.getElementById(`subPkg_${catId}_${subId}`);
+  const sel = container?.querySelector('select');
+  if (!sel) return;
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    const sub = (cat.subcategories || []).find(s => s.id === subId);
+    if (!sub) return;
+    if (sel.value === '') { delete sub.formPackage; }
+    else { sub.formPackage = sel.value; }
+    await saveCategories(cats);
+    showToast('Formular salvat!');
+  } catch (e) {
+    showToast('Eroare. Verifică Firebase.');
+    console.error('saveSubcategoryPackage:', e);
+  }
+}
+
+async function saveCategoryExtras(catId) {
+  const container = document.getElementById('catExtras_' + catId);
+  if (!container) return;
+  const checked = [...container.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    cat.allowedExtras = checked;
+    await saveCategories(cats);
+    showToast('Opțiuni salvate!');
+  } catch (e) {
+    showToast('Eroare la salvare. Verifică Firebase.');
+    console.error('saveCategoryExtras:', e);
+  }
+}
+
+async function saveSubcategoryExtras(catId, subId) {
+  const container = document.getElementById('subExtras_' + catId + '_' + subId);
+  if (!container) return;
+  const checked = [...container.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    const sub = (cat.subcategories || []).find(s => s.id === subId);
+    if (!sub) return;
+    sub.allowedExtras = checked;
+    await saveCategories(cats);
+    showToast('Opțiuni salvate!');
+  } catch (e) {
+    showToast('Eroare la salvare. Verifică Firebase.');
+    console.error('saveSubcategoryExtras:', e);
+  }
+}
+
+async function addSubcategory(catId) {
+  const input = document.getElementById('newSub_' + catId);
+  const label = input ? input.value.trim() : '';
+  if (!label) { alert('Introdu numele subcategoriei.'); return; }
+  const id = label.toLowerCase()
+    .replace(/ă/g,'a').replace(/â/g,'a').replace(/î/g,'i')
+    .replace(/ș/g,'s').replace(/ț/g,'t')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    const subs = cat.subcategories || [];
+    if (subs.find(s => s.id === id)) { alert('Această subcategorie există deja.'); return; }
+    cat.subcategories = [...subs, { id, label }];
+    await saveCategories(cats);
+    input.value = '';
+    await renderCategoryList();
+    buildSubcategorySelect();
+    showToast(`Subcategoria "${label}" a fost adăugată!`);
+  } catch (e) {
+    showToast('Eroare la salvare. Verifică Firebase.');
+    console.error('addSubcategory:', e);
+  }
+}
+
+async function deleteSubcategory(catId, subId) {
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    const sub = (cat.subcategories || []).find(s => s.id === subId);
+    if (!sub) return;
+    if (!confirm(`Ștergi subcategoria "${sub.label}"?`)) return;
+    cat.subcategories = (cat.subcategories || []).filter(s => s.id !== subId);
+    await saveCategories(cats);
+    await renderCategoryList();
+    buildSubcategorySelect();
+    showToast('Subcategorie ștearsă.');
+  } catch (e) {
+    showToast('Eroare la ștergere. Verifică Firebase.');
+    console.error('deleteSubcategory:', e);
+  }
 }
 
 /* ── PAPER TYPES ── */
@@ -239,7 +464,7 @@ async function addPaperType() {
     await savePaperTypes(types);
     document.getElementById('newPaperName').value     = '';
     document.getElementById('newPaperIncrease').value = '';
-    await renderPaperTypeList();
+    await Promise.all([renderPaperTypeList(), renderCategoryList()]);
     showToast(`Opțiunea "${name}" a fost adăugată!`);
   } catch (e) {
     showToast('Eroare: nu s-a putut adăuga opțiunea. Verifică Firebase.');
@@ -254,7 +479,7 @@ async function deletePaperType(id) {
     if (!t) return;
     if (!confirm(`Ștergi opțiunea "${t.name}"?`)) return;
     await savePaperTypes(types.filter(t => t.id !== id));
-    await renderPaperTypeList();
+    await Promise.all([renderPaperTypeList(), renderCategoryList()]);
     showToast('Opțiune ștearsă.');
   } catch (e) {
     showToast('Eroare la ștergere. Verifică Firebase.');
@@ -356,11 +581,12 @@ function compressImage(file) {
 }
 
 async function saveProduct() {
-  const name     = document.getElementById('fName').value.trim();
-  const category = document.getElementById('fCategory').value;
-  const price    = document.getElementById('fPrice').value.trim();
-  const desc     = document.getElementById('fDesc').value.trim();
-  const editId   = document.getElementById('editId').value;
+  const name        = document.getElementById('fName').value.trim();
+  const category    = document.getElementById('fCategory').value;
+  const subcategory = document.getElementById('fSubcategory')?.value || '';
+  const price       = document.getElementById('fPrice').value.trim();
+  const desc        = document.getElementById('fDesc').value.trim();
+  const editId      = document.getElementById('editId').value;
 
   if (!name)  { alert('Te rog introdu numele produsului.'); return; }
   if (!price) { alert('Te rog introdu prețul.'); return; }
@@ -384,7 +610,7 @@ async function saveProduct() {
       }
     }
 
-    const data = { name, category, price, description: desc, images };
+    const data = { name, category, subcategory, price, description: desc, images };
 
     if (editId) {
       await docRef.update({ ...data, updatedAt: new Date().toISOString() });
@@ -414,6 +640,8 @@ async function editProduct(id) {
     document.getElementById('fDesc').value  = p.description || '';
     await buildCategorySelect();
     document.getElementById('fCategory').value = p.category;
+    buildSubcategorySelect();
+    if (p.subcategory) document.getElementById('fSubcategory').value = p.subcategory;
     loadSlotsFromProduct(getProductImages(p));
     document.getElementById('formTitle').textContent   = 'Editează Produs';
     document.getElementById('btnCancel').style.display = 'block';
@@ -442,6 +670,7 @@ async function resetForm() {
   ['editId','fName','fPrice','fDesc'].forEach(id => document.getElementById(id).value = '');
   resetAllSlots();
   await buildCategorySelect();
+  document.getElementById('fSubcategoryGroup').style.display = 'none';
   document.getElementById('formTitle').textContent   = 'Adaugă Produs';
   document.getElementById('btnCancel').style.display = 'none';
 }
@@ -463,12 +692,18 @@ async function renderAdminList() {
       const thumb  = images.length > 0
         ? `<img class="admin-thumb" src="${images[0]}" alt="${escHtml(p.name)}" />`
         : `<div class="admin-thumb-ph">${cat.icon}</div>`;
+      const subLabel = p.subcategory && cat.subcategories
+        ? (cat.subcategories.find(s => s.id === p.subcategory)?.label || '')
+        : '';
+      const metaStr = escHtml(cat.label) +
+        (subLabel ? ` / ${escHtml(subLabel)}` : '') +
+        (images.length > 1 ? ` · ${images.length} foto` : '');
       return `
         <div class="admin-product-item">
           ${thumb}
           <div class="admin-product-info">
             <div class="admin-product-name">${escHtml(p.name)}</div>
-            <div class="admin-product-meta">${escHtml(cat.label)}${images.length > 1 ? ` · ${images.length} foto` : ''}</div>
+            <div class="admin-product-meta">${metaStr}</div>
           </div>
           <div class="admin-product-price">${escHtml(String(p.price))} lei</div>
           <button class="btn-edit"   onclick="editProduct('${p.id}')">Editează</button>
@@ -547,6 +782,105 @@ function showToast(msg) {
   t.textContent = msg; t.style.opacity = '1';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 5000);
+}
+
+/* ── ORDERS ── */
+async function renderAdminOrderList() {
+  const el = document.getElementById('adminOrderList');
+  if (!el) return;
+  try {
+    const snap = await db.collection('orders').orderBy('createdAt', 'desc').get();
+
+    if (snap.empty) {
+      el.innerHTML = '<div class="admin-orders-empty">Nicio comandă primită încă.</div>';
+      return;
+    }
+
+    const orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const newCount = orders.filter(o => o.status === 'new').length;
+    const badge = document.getElementById('ordersNewBadge');
+    if (badge) {
+      badge.textContent = newCount;
+      badge.style.display = newCount > 0 ? 'inline-flex' : 'none';
+    }
+
+    const typeLabel = { nunta: '💍 Nuntă', botez: '👶 Botez', other: '📋 Altele' };
+
+    el.innerHTML = orders.map(o => {
+      const date = o.createdAt
+        ? new Date(o.createdAt).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : '';
+      const statusClass = o.status === 'completed' ? 'order-status-completed' : 'order-status-new';
+      const statusLabel = o.status === 'completed' ? 'Finalizată' : 'Comandă nouă';
+
+      const itemsHtml = (o.items || []).map(item => {
+        const extrasNote = item.extras && item.extras.length ? ` <span style="color:var(--text-light);font-size:0.78rem;">(${escHtml(item.extras.join(', '))})</span>` : '';
+        return `<div class="admin-order-product">
+          <span>${escHtml(item.name)}${extrasNote} × ${item.qty}</span>
+          <span>${(item.subtotal || 0).toFixed(2)} lei</span>
+        </div>`;
+      }).join('');
+
+      const detailsHtml = Object.entries(o.details || {}).map(([sectionKey, sectionVal]) => {
+        if (sectionVal && typeof sectionVal === 'object') {
+          const rows = Object.entries(sectionVal).filter(([, v]) => v).map(([k, v]) =>
+            `<div class="admin-order-detail-row"><strong>${escHtml(k)}</strong>${escHtml(String(v))}</div>`
+          ).join('');
+          return rows ? `<div class="admin-order-section-title">${escHtml(sectionKey)}</div><div class="admin-order-details-grid">${rows}</div>` : '';
+        }
+        if (!sectionVal) return '';
+        return `<div class="admin-order-detail-row"><strong>${escHtml(sectionKey)}</strong>${escHtml(String(sectionVal))}</div>`;
+      }).filter(Boolean).join('');
+
+      const finalizeBtn = o.status !== 'completed'
+        ? `<button class="btn-finalize" onclick="finalizeOrder('${o.id}')">✓ Finalizează</button>`
+        : '';
+
+      return `
+        <div class="admin-order-item" id="order_${o.id}">
+          <div class="admin-order-header">
+            <span class="${statusClass}">${statusLabel}</span>
+            <span class="admin-order-type">${typeLabel[o.type] || o.type}</span>
+            <span class="admin-order-date">${date}</span>
+            <span class="admin-order-id">#${o.id.slice(0,8)}</span>
+          </div>
+          <div class="admin-order-items">${itemsHtml}</div>
+          <div class="admin-order-total">Total: ${(o.total || 0).toFixed(2)} lei</div>
+          ${detailsHtml ? `<div class="admin-order-details"><div class="admin-order-details-grid">${detailsHtml}</div></div>` : ''}
+          <div class="admin-order-actions">
+            ${finalizeBtn}
+            <button class="btn-delete" onclick="deleteOrder('${o.id}')">Șterge</button>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) {
+    el.innerHTML = '<div class="admin-orders-empty">Eroare la încărcarea comenzilor. Verifică Firebase.</div>';
+    console.error('renderAdminOrderList:', e);
+  }
+}
+
+async function finalizeOrder(id) {
+  if (!confirm('Marchezi această comandă ca finalizată?')) return;
+  try {
+    await db.collection('orders').doc(id).update({ status: 'completed' });
+    await renderAdminOrderList();
+    showToast('Comandă finalizată! ✓');
+  } catch (e) {
+    showToast('Eroare la actualizare. Verifică Firebase.');
+    console.error('finalizeOrder:', e);
+  }
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Ștergi această comandă definitiv?')) return;
+  try {
+    await db.collection('orders').doc(id).delete();
+    await renderAdminOrderList();
+    showToast('Comandă ștearsă.');
+  } catch (e) {
+    showToast('Eroare la ștergere. Verifică Firebase.');
+    console.error('deleteOrder:', e);
+  }
 }
 
 checkAuth();
