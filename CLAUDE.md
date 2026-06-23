@@ -45,3 +45,11 @@ Comunicarea se face în **limba română**.
 - Scrie întotdeauna în **română**
 - Testarea se face deschizând `index.html` direct în browser
 - Admin accesibil la `admin.html`
+
+## Workflow deploy
+- Lucrează **doar local** pe `D:\Proiecte\Invitatii cu Dichis by Ale\`
+- **Nu face push** la GitHub/Netlify decât când utilizatorul spune explicit "actualizează link-ul"
+- La update: `git add -A` → `git commit` → `git push origin main`
+- git.exe: `C:\Users\rr875\AppData\Local\GitHubDesktop\app-3.5.12\resources\app\git\cmd\git.exe`
+- Site live: https://invitatii-cu-dichis-by-ale.netlify.app/
+- GitHub: https://github.com/rr875749-pixel/invitatii-cu-dichis

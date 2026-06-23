@@ -338,7 +338,7 @@ function compressImage(file) {
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        const MAX = 1500;
+        const MAX = 1000;
         let w = img.width, h = img.height;
         if (w > MAX || h > MAX) {
           if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -347,7 +347,7 @@ function compressImage(file) {
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.92));
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
       };
       img.src = e.target.result;
     };
@@ -369,11 +369,16 @@ async function saveProduct() {
   btn.textContent = 'Se salvează...'; btn.disabled = true;
 
   try {
+    const docRef = editId
+      ? db.collection('products').doc(editId)
+      : db.collection('products').doc();
+
     const images = [];
     for (let i = 0; i < 4; i++) {
       const fi = document.getElementById('fImage' + i);
       if (fi && fi.files && fi.files[0]) {
-        images.push(await compressImage(fi.files[0]));
+        const b64 = await compressImage(fi.files[0]);
+        images.push(b64);
       } else if (slotData[i]) {
         images.push(slotData[i]);
       }
@@ -382,9 +387,9 @@ async function saveProduct() {
     const data = { name, category, price, description: desc, images };
 
     if (editId) {
-      await db.collection('products').doc(editId).update({ ...data, updatedAt: new Date().toISOString() });
+      await docRef.update({ ...data, updatedAt: new Date().toISOString() });
     } else {
-      await db.collection('products').add({ ...data, createdAt: new Date().toISOString() });
+      await docRef.set({ ...data, createdAt: new Date().toISOString() });
     }
 
     await resetForm();

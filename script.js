@@ -316,6 +316,18 @@ db.collection('feedback').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
   renderFeedback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
 }, err => console.error('Feedback listener:', err));
 
+/* ── SCROLL COMPACT HEADER ── */
+(function () {
+  const header = document.querySelector('header');
+  function onFirstScroll() {
+    if (window.scrollY > 5) {
+      header.classList.add('compact');
+      window.removeEventListener('scroll', onFirstScroll);
+    }
+  }
+  window.addEventListener('scroll', onFirstScroll, { passive: true });
+})();
+
 /* ── INIT ── */
 db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
   allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
