@@ -15,7 +15,7 @@ const DEFAULT_CATEGORIES  = [
   { id: 'botez', label: 'Invitații Botez', icon: '👶' },
   { id: 'plic',  label: 'Plicuri',         icon: '✉️' },
 ];
-const DEFAULT_PAPER_TYPES = [{ id: 'standard', name: 'Standard', priceIncrease: 0 }];
+const DEFAULT_PAPER_TYPES = [];
 
 // Imaginile curente per slot (base64) pentru produsul aflat în editare
 let slotData = ['', '', '', ''];
@@ -227,36 +227,35 @@ async function savePaperTypes(list) {
 async function addPaperType() {
   const name = document.getElementById('newPaperName').value.trim();
   const inc  = parseFloat(document.getElementById('newPaperIncrease').value) || 0;
-  if (!name) { alert('Introdu numele tipului de hârtie.'); return; }
+  if (!name) { alert('Introdu numele opțiunii extra.'); return; }
   const id = name.toLowerCase()
     .replace(/ă/g,'a').replace(/â/g,'a').replace(/î/g,'i')
     .replace(/ș/g,'s').replace(/ț/g,'t')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   try {
     const types = await getPaperTypes();
-    if (types.find(t => t.id === id)) { alert('Acest tip de hârtie există deja.'); return; }
+    if (types.find(t => t.id === id)) { alert('Această opțiune există deja.'); return; }
     types.push({ id, name, priceIncrease: inc });
     await savePaperTypes(types);
     document.getElementById('newPaperName').value     = '';
     document.getElementById('newPaperIncrease').value = '';
     await renderPaperTypeList();
-    showToast(`Tip hârtie "${name}" adăugat!`);
+    showToast(`Opțiunea "${name}" a fost adăugată!`);
   } catch (e) {
-    showToast('Eroare: nu s-a putut adăuga tipul de hârtie. Verifică Firebase.');
+    showToast('Eroare: nu s-a putut adăuga opțiunea. Verifică Firebase.');
     console.error('addPaperType:', e);
   }
 }
 
 async function deletePaperType(id) {
-  if (id === 'standard') { alert('Tipul Standard nu poate fi șters.'); return; }
   try {
     const types = await getPaperTypes();
     const t = types.find(t => t.id === id);
     if (!t) return;
-    if (!confirm(`Ștergi tipul "${t.name}"?`)) return;
+    if (!confirm(`Ștergi opțiunea "${t.name}"?`)) return;
     await savePaperTypes(types.filter(t => t.id !== id));
     await renderPaperTypeList();
-    showToast('Tip hârtie șters.');
+    showToast('Opțiune ștearsă.');
   } catch (e) {
     showToast('Eroare la ștergere. Verifică Firebase.');
     console.error('deletePaperType:', e);
@@ -268,15 +267,16 @@ async function renderPaperTypeList() {
     const el = document.getElementById('paperTypeList');
     if (!el) return;
     const types = await getPaperTypes();
+    if (types.length === 0) {
+      el.innerHTML = '<div class="paper-empty">Nicio opțiune extra adăugată încă.</div>';
+      return;
+    }
     el.innerHTML = types.map(t => `
       <div class="cat-item">
-        <span class="cat-icon">📄</span>
+        <span class="cat-icon">✨</span>
         <span class="cat-label">${escHtml(t.name)}</span>
         <span class="paper-increase">+${escHtml(String(t.priceIncrease))} lei/buc</span>
-        ${t.id === 'standard'
-          ? '<span class="cat-default">implicit</span>'
-          : `<button class="btn-delete-cat" onclick="deletePaperType('${escHtml(t.id)}')">Șterge</button>`
-        }
+        <button class="btn-delete-cat" onclick="deletePaperType('${escHtml(t.id)}')">Șterge</button>
       </div>`).join('');
   } catch (e) { console.error('renderPaperTypeList:', e); }
 }

@@ -900,8 +900,7 @@ footer {
   color: var(--text-light);
 }
 
-.calc-qty,
-.calc-paper {
+.calc-qty {
   width: 100%;
   padding: 7px 10px;
   border: 1px solid var(--border);
@@ -914,10 +913,53 @@ footer {
   transition: border-color 0.2s;
 }
 
-.calc-qty:focus,
-.calc-paper:focus {
+.calc-qty:focus {
   border-color: var(--pink-main);
   background: var(--white);
+}
+
+.calc-extras {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.extras-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.extra-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.extra-opt input[type="checkbox"] {
+  accent-color: var(--pink-main);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.extra-opt-name {
+  flex: 1;
+}
+
+.extra-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem;
+  color: var(--gold);
+  font-style: italic;
 }
 
 .calc-total {
@@ -932,7 +974,16 @@ footer {
   color: var(--pink-dark);
 }
 
-/* ── ADMIN: TIPURI HÂRTIE ── */
+/* ── ADMIN: EXTRA OPȚIUNI ── */
+.paper-empty {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.92rem;
+  color: var(--text-light);
+  font-style: italic;
+  padding: 10px 0;
+}
+
+/* legacy selector kept for .paper-increase/.paper-hint used below */
 .paper-increase {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.88rem;

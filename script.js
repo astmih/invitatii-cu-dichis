@@ -3,7 +3,7 @@ const DEFAULT_CATEGORIES = [
   { id: 'botez', label: 'Invitații Botez', icon: '👶' },
   { id: 'plic',  label: 'Plicuri',         icon: '✉️' },
 ];
-const DEFAULT_PAPER_TYPES = [{ id: 'standard', name: 'Standard', priceIncrease: 0 }];
+const DEFAULT_PAPER_TYPES = [];
 
 let currentFilter    = 'all';
 let allProducts      = [];
@@ -87,11 +87,15 @@ function renderProducts() {
     ? allProducts
     : allProducts.filter(p => p.category === currentFilter);
 
-  const paperOpts = cachedPaperTypes.map(t =>
-    `<option value="${escHtml(t.id)}" data-increase="${t.priceIncrease}">` +
-    `${escHtml(t.name)}${t.priceIncrease > 0 ? ' (+' + t.priceIncrease + ' lei)' : ''}` +
-    `</option>`
-  ).join('');
+  const extraOptsHtml = cachedPaperTypes.length > 0
+    ? cachedPaperTypes.map(t =>
+        `<label class="extra-opt">` +
+        `<input type="checkbox" class="calc-extra" data-increase="${t.priceIncrease}" onchange="calcTotal(this.closest('.product-card'))" />` +
+        `<span class="extra-opt-name">${escHtml(t.name)}</span>` +
+        (t.priceIncrease > 0 ? `<span class="extra-price">(+${t.priceIncrease} lei/buc)</span>` : '') +
+        `</label>`
+      ).join('')
+    : '';
 
   productImagesMap = {};
 
@@ -142,13 +146,8 @@ function renderProducts() {
                        data-base="${escHtml(String(p.price))}"
                        oninput="calcTotal(this.closest('.product-card'))" />
               </div>
-              <div class="calc-field">
-                <label class="calc-label">Tip hârtie</label>
-                <select class="calc-paper" onchange="calcTotal(this.closest('.product-card'))">
-                  ${paperOpts}
-                </select>
-              </div>
             </div>
+            ${extraOptsHtml ? `<div class="calc-extras"><label class="calc-label">Extra opțiuni</label><div class="extras-list">${extraOptsHtml}</div></div>` : ''}
             <div class="calc-total">Total estimat: <strong class="calc-total-val">— lei</strong></div>
           </div>
         </div>
@@ -159,11 +158,13 @@ function renderProducts() {
 }
 
 function calcTotal(card) {
-  const qty      = Math.max(1, parseInt(card.querySelector('.calc-qty').value) || 1);
-  const base     = parseFloat(card.querySelector('.calc-qty').dataset.base) || 0;
-  const sel      = card.querySelector('.calc-paper');
-  const increase = parseFloat(sel.selectedOptions[0]?.dataset.increase || '0') || 0;
-  card.querySelector('.calc-total-val').textContent = ((base + increase) * qty).toFixed(2) + ' lei';
+  const qty  = Math.max(1, parseInt(card.querySelector('.calc-qty').value) || 1);
+  const base = parseFloat(card.querySelector('.calc-qty').dataset.base) || 0;
+  let extraTotal = 0;
+  card.querySelectorAll('.calc-extra:checked').forEach(cb => {
+    extraTotal += parseFloat(cb.dataset.increase || '0') || 0;
+  });
+  card.querySelector('.calc-total-val').textContent = ((base + extraTotal) * qty).toFixed(2) + ' lei';
 }
 
 function catColor(id, alpha) {
