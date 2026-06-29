@@ -807,6 +807,39 @@ async function submitOrderDirect() {
 
 /* ── POLITICI ── */
 const POLICY_CONTENT = {
+  termeni: {
+    title: 'Termeni și Condiții',
+    html: `
+      <p><strong>Ultima actualizare:</strong> Iunie 2026</p>
+
+      <h2>Despre noi</h2>
+      <p>Invitații cu Dichis by Ale este o activitate de creare și vânzare de invitații personalizate pentru nunți și botezuri, cu sediul în Iași, România. Prin plasarea unei comenzi pe acest site, acceptați termenii și condițiile de mai jos.</p>
+
+      <h2>Produsele noastre</h2>
+      <p>Toate produsele sunt realizate manual și personalizate conform datelor furnizate de client. Pozele de pe site sunt orientative — culorile reale pot varia ușor față de afișajul monitorului. Pentru o mostră de culoare, ne puteți contacta înainte de comandă.</p>
+
+      <h2>Cum se plasează o comandă</h2>
+      <p>Comanda se plasează prin formularul de pe site, selectând produsele dorite și completând datele evenimentului. Comanda devine fermă doar după confirmarea noastră explicită prin WhatsApp sau alt mijloc de contact. Până la confirmare, nu începem producția.</p>
+
+      <h2>Prețuri și plată</h2>
+      <p>Prețurile afișate sunt exprimate în lei și nu includ TVA. Plata se realizează conform înțelegerii stabilite la confirmarea comenzii (avans și/sau plată integrală la livrare). Ne rezervăm dreptul de a modifica prețurile fără notificare prealabilă, dar prețul convenit la confirmarea comenzii rămâne fix.</p>
+
+      <h2>Producție și livrare</h2>
+      <p>Termenul de producție este stabilit de comun acord la confirmarea comenzii și depinde de complexitate și volumul comenzilor în curs. Nu ne asumăm răspunderea pentru întârzieri cauzate de forță majoră sau de furnizarea tardivă a datelor de către client. Livrarea se face prin curier sau ridicare personală din Iași, conform înțelegerii.</p>
+
+      <h2>Responsabilitatea clientului</h2>
+      <p>Clientul este responsabil pentru corectitudinea tuturor datelor furnizate (nume, date, locații, numere de telefon). Verificați cu atenție toate informațiile înainte de confirmare. Nu ne asumăm răspunderea pentru greșeli provenite din date eronate transmise de client.</p>
+
+      <h2>Proprietate intelectuală</h2>
+      <p>Toate modelele și designurile prezentate pe site aparțin Invitații cu Dichis by Ale. Este interzisă reproducerea sau utilizarea lor comercială fără acordul nostru scris.</p>
+
+      <h2>Modificarea termenilor</h2>
+      <p>Ne rezervăm dreptul de a modifica acești termeni oricând. Versiunea actualizată va fi publicată pe site. Continuarea utilizării site-ului după modificări reprezintă acceptul noilor termeni.</p>
+
+      <h2>Legislație aplicabilă</h2>
+      <p>Acești termeni sunt guvernați de legislația română în vigoare. Orice litigiu va fi soluționat pe cale amiabilă sau, în caz contrar, prin instanțele competente din Iași.</p>
+    `
+  },
   confidentialitate: {
     title: 'Politica de Confidențialitate',
     html: `
