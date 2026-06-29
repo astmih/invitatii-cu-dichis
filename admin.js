@@ -20,7 +20,7 @@ const DEFAULT_PAPER_TYPES = [];
 let adminCats = [...DEFAULT_CATEGORIES];
 
 // Imaginile curente per slot (base64) pentru produsul aflat în editare
-let slotData = ['', '', '', ''];
+let slotData = ['', '', ''];
 
 /* ── AUTH ── */
 function checkAuth() {
@@ -273,12 +273,16 @@ async function renderCategoryList() {
       const catPkg    = c.formPackage !== undefined ? c.formPackage : getCatDefaultPkg(c.id);
       const subs      = c.subcategories || [];
 
-      const subsHtml = subs.map(s => {
+      const subsHtml = subs.map((s, idx) => {
         const subPkg = s.formPackage !== undefined ? s.formPackage : '';
+        const isFirst = idx === 0;
+        const isLast  = idx === subs.length - 1;
         return `
           <div class="subcat-item">
             <span class="subcat-bullet">—</span>
             <span class="subcat-label">${escHtml(s.label)}</span>
+            <button class="btn-move-subcat" onclick="moveSubcategory('${escHtml(c.id)}','${escHtml(s.id)}',-1)" ${isFirst ? 'disabled' : ''} title="Mută sus">▲</button>
+            <button class="btn-move-subcat" onclick="moveSubcategory('${escHtml(c.id)}','${escHtml(s.id)}',1)" ${isLast ? 'disabled' : ''} title="Mută jos">▼</button>
             <button class="btn-delete-subcat" onclick="deleteSubcategory('${escHtml(c.id)}','${escHtml(s.id)}')">✕</button>
           </div>
           <div class="subcat-pkg-row" id="subPkg_${escHtml(c.id)}_${escHtml(s.id)}">
@@ -434,6 +438,28 @@ async function deleteSubcategory(catId, subId) {
   }
 }
 
+async function moveSubcategory(catId, subId, direction) {
+  try {
+    const cats = await getCategories();
+    const cat  = cats.find(c => c.id === catId);
+    if (!cat) return;
+    const subs = cat.subcategories || [];
+    const idx  = subs.findIndex(s => s.id === subId);
+    if (idx < 0) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= subs.length) return;
+    [subs[idx], subs[newIdx]] = [subs[newIdx], subs[idx]];
+    cat.subcategories = subs;
+    await saveCategories(cats);
+    await renderCategoryList();
+    buildSubcategorySelect();
+    showToast('Ordine actualizată!');
+  } catch (e) {
+    showToast('Eroare la reordonare. Verifică Firebase.');
+    console.error('moveSubcategory:', e);
+  }
+}
+
 /* ── CLEANUP ── */
 async function fixSubcategories() {
   try {
@@ -561,14 +587,14 @@ function clearSlot(index) {
 }
 
 function resetAllSlots() {
-  slotData = ['', '', '', ''];
-  for (let i = 0; i < 4; i++) clearSlot(i);
+  slotData = ['', '', ''];
+  for (let i = 0; i < 3; i++) clearSlot(i);
 }
 
 function loadSlotsFromProduct(images) {
   resetAllSlots();
   images.forEach((img, i) => {
-    if (i < 4 && img) {
+    if (i < 3 && img) {
       slotData[i] = img;
       showSlotPreview(i, img);
     }
@@ -624,7 +650,7 @@ async function saveProduct() {
       : db.collection('products').doc();
 
     const images = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const fi = document.getElementById('fImage' + i);
       if (fi && fi.files && fi.files[0]) {
         const b64 = await compressImage(fi.files[0]);

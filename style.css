@@ -333,6 +333,22 @@ header.compact .nav-top {
 
 .btn-comanda:hover { background: var(--text-dark); transform: scale(1.04); }
 
+.loading-state {
+  text-align: center; padding: 70px 24px;
+  color: var(--text-light);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+}
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--pink-pale);
+  border-top-color: var(--pink-dark);
+  border-radius: 50%;
+  margin: 0 auto 18px;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 .empty-state {
   text-align: center; padding: 70px 24px;
   color: var(--text-light);
@@ -959,6 +975,21 @@ footer {
 }
 
 .btn-delete-subcat:hover { background: #C96070; border-color: #C96070; color: white; }
+
+.btn-move-subcat {
+  padding: 2px 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-medium);
+  font-size: 0.65rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.btn-move-subcat:hover:not(:disabled) { background: var(--pink-pale); }
+.btn-move-subcat:disabled { opacity: 0.25; cursor: default; }
 
 .subcat-add-row {
   display: flex;

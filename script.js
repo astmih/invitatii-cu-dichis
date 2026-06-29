@@ -11,6 +11,7 @@ let allProducts      = [];
 let cachedCategories = DEFAULT_CATEGORIES;
 let cachedPaperTypes = DEFAULT_PAPER_TYPES;
 let productImagesMap = {};
+let productsLoaded   = false;
 
 // Lightbox
 let lbImages = [];
@@ -136,7 +137,9 @@ function renderProducts() {
   productImagesMap = {};
 
   if (list.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><p>Nu există produse în această categorie încă.</p></div>`;
+    grid.innerHTML = productsLoaded
+      ? `<div class="empty-state"><p>Nu există produse în această categorie încă.</p></div>`
+      : `<div class="loading-state"><div class="loading-spinner"></div><p>Se încarcă produsele...</p></div>`;
     return;
   }
 
@@ -367,6 +370,37 @@ db.collection('feedback').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
   renderFeedback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
 }, err => console.error('Feedback listener:', err));
 
+/* ── NAVIGARE SECȚIUNI ── */
+const PAGE_SECTIONS = {
+  acasa:    ['acasa', 'contact'],
+  produse:  ['produse'],
+  culori:   ['culori'],
+  feedback: ['feedback'],
+  contact:  ['contact'],
+  despre:   ['despre'],
+};
+
+function showPage(page) {
+  const toShow = new Set(PAGE_SECTIONS[page] || [page]);
+  document.querySelectorAll('section[data-page]').forEach(el => {
+    const pages = el.dataset.page.trim().split(/\s+/);
+    el.style.display = pages.some(p => toShow.has(p)) ? '' : 'none';
+  });
+  document.querySelectorAll('.nav-row a[data-page]').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === page);
+  });
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.nav-row a[data-page]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    showPage(a.dataset.page);
+  });
+});
+
+showPage('acasa');
+
 /* ── SCROLL COMPACT HEADER ── */
 (function () {
   const header = document.querySelector('header');
@@ -381,12 +415,14 @@ db.collection('feedback').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
 
 /* ── INIT ── */
 db.collection('products').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+  productsLoaded = true;
   allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
   renderProducts();
 }, err => console.error('Products listener:', err));
 
 loadConfig();
 initStarRating();
+
 
 /* ══════════════════════════════
    COȘ DE CUMPĂRĂTURI
