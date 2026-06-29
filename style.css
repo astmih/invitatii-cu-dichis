@@ -515,6 +515,18 @@ footer {
   text-align: center; padding: 24px;
   font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;
 }
+.footer-links { margin-top: 8px; font-size: 0.85rem; }
+.footer-links a { color: var(--gold); text-decoration: none; opacity: 0.85; }
+.footer-links a:hover { opacity: 1; text-decoration: underline; }
+
+/* ── POLITICI MODAL ── */
+.policy-panel { width: 680px; }
+.policy-body { padding: 24px 28px; font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; line-height: 1.7; color: var(--text-dark); }
+.policy-body h2 { font-family: 'Great Vibes', cursive; font-size: 1.8rem; color: var(--pink-dark); margin: 20px 0 6px; }
+.policy-body h3 { font-size: 1rem; font-weight: 700; margin: 16px 0 4px; color: var(--text-dark); text-transform: uppercase; letter-spacing: 0.05em; }
+.policy-body p { margin: 0 0 10px; }
+.policy-body ul { margin: 0 0 10px 20px; }
+.policy-body ul li { margin-bottom: 4px; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {

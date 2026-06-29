@@ -804,3 +804,92 @@ async function submitOrderDirect() {
       </div>`;
   } catch(e) { console.error(e); }
 }
+
+/* ── POLITICI ── */
+const POLICY_CONTENT = {
+  confidentialitate: {
+    title: 'Politica de Confidențialitate',
+    html: `
+      <p><strong>Ultima actualizare:</strong> Iunie 2026</p>
+
+      <h2>Cine suntem</h2>
+      <p>Invitații cu Dichis by Ale este o activitate de creare și vânzare de invitații personalizate pentru nunți și botezuri, cu sediul în Iași, România. Ne puteți contacta prin WhatsApp sau rețelele sociale indicate pe site.</p>
+
+      <h2>Ce date colectăm</h2>
+      <p>Prin formularul de comandă, colectăm:</p>
+      <ul>
+        <li>Nume și prenume (ale dumneavoastră și ale celor menționați în invitație)</li>
+        <li>Număr de telefon</li>
+        <li>Data și locația evenimentului</li>
+        <li>Produsele selectate și detaliile comenzii</li>
+      </ul>
+      <p>Nu colectăm adrese de email, date de card bancar sau orice alte date sensibile.</p>
+
+      <h2>De ce colectăm aceste date</h2>
+      <p>Datele sunt folosite exclusiv pentru procesarea și finalizarea comenzii dumneavoastră. Nu le folosim în scopuri de marketing și nu le transmitem unor terțe părți.</p>
+
+      <h2>Unde sunt stocate datele</h2>
+      <p>Comenzile sunt stocate în Firebase Firestore (serviciu Google LLC), pe servere securizate. Google respectă reglementările GDPR aplicabile în Uniunea Europeană.</p>
+
+      <h2>Cât timp păstrăm datele</h2>
+      <p>Datele comenzii sunt păstrate până la finalizarea acesteia și maximum 12 luni ulterior, pentru evidență internă. La cerere, le putem șterge oricând.</p>
+
+      <h2>Drepturile dumneavoastră</h2>
+      <p>Conform GDPR, aveți dreptul să:</p>
+      <ul>
+        <li>Solicitați accesul la datele dumneavoastră</li>
+        <li>Solicitați corectarea sau ștergerea acestora</li>
+        <li>Vă opuneți prelucrării lor</li>
+      </ul>
+      <p>Pentru orice solicitare, ne contactați prin WhatsApp sau rețelele sociale de pe site. Răspundem în maximum 30 de zile.</p>
+
+      <h2>Cookie-uri</h2>
+      <p>Site-ul nu folosește cookie-uri de urmărire sau publicitate. Firebase poate stoca date tehnice minime necesare funcționării aplicației.</p>
+    `
+  },
+  retur: {
+    title: 'Politica de Retur',
+    html: `
+      <p><strong>Ultima actualizare:</strong> Iunie 2026</p>
+
+      <h2>Produse personalizate</h2>
+      <p>Toate produsele noastre sunt <strong>realizate la comandă</strong>, personalizate cu datele evenimentului dumneavoastră (nume, date, locații). Conform art. 16 lit. c din OUG 34/2014 (care transpune Directiva UE 2011/83/UE), produsele confecționate după specificațiile consumatorului sunt <strong>exceptate de la dreptul de retragere</strong> de 14 zile.</p>
+      <p>Prin urmare, comenzile plasate și confirmate nu pot fi returnate sau anulate după începerea producției.</p>
+
+      <h2>Anularea comenzii</h2>
+      <p>O comandă poate fi anulată <strong>înainte de confirmarea producției</strong>, adică înainte ca Alexandra să confirme că a început lucrul. Dacă doriți să anulați, contactați-ne cât mai rapid prin WhatsApp.</p>
+
+      <h2>Reclamații de calitate</h2>
+      <p>Dacă produsele primite prezintă defecte de calitate sau diferențe față de ce s-a agreat (culori greșite, greșeli de tipar care nu aparțin clientului), vă rugăm să:</p>
+      <ul>
+        <li>Ne contactați în maximum <strong>48 de ore</strong> de la primirea coletului</li>
+        <li>Trimiteți fotografii clare cu produsele și defectul semnalat</li>
+      </ul>
+      <p>Analizăm fiecare situație și propunem o soluție: refacerea produselor afectate sau o altă rezolvare convenită de comun acord.</p>
+
+      <h2>Responsabilitatea clientului</h2>
+      <p>Nu ne asumăm responsabilitatea pentru greșeli provenite din datele transmise incorect de client (nume greșite, date eronate, locații incorecte). Vă recomandăm să verificați cu atenție toate informațiile înainte de confirmarea comenzii.</p>
+
+      <h2>Contact</h2>
+      <p>Pentru orice nelămurire legată de comandă sau calitatea produselor, ne contactați prin WhatsApp sau rețelele sociale indicate pe site. Răspundem în cel mai scurt timp posibil.</p>
+    `
+  }
+};
+
+function openPolicy(type) {
+  const content = POLICY_CONTENT[type];
+  if (!content) return;
+  document.getElementById('policyTitle').textContent = content.title;
+  document.getElementById('policyBody').innerHTML = content.html;
+  document.getElementById('policyModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePolicy() {
+  document.getElementById('policyModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function closePolicyOnOverlay(e) {
+  if (e.target.id === 'policyModal') closePolicy();
+}

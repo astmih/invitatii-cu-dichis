@@ -151,7 +151,23 @@
 
   <footer>
     <p>© 2026 Invitații cu Dichis by Ale &nbsp;·&nbsp; Toate drepturile rezervate</p>
+    <p class="footer-links">
+      <a href="#" onclick="openPolicy('confidentialitate'); return false;">Politica de Confidențialitate</a>
+      &nbsp;·&nbsp;
+      <a href="#" onclick="openPolicy('retur'); return false;">Politica de Retur</a>
+    </p>
   </footer>
+
+  <!-- MODAL POLITICĂ CONFIDENȚIALITATE -->
+  <div class="order-overlay" id="policyModal" onclick="closePolicyOnOverlay(event)">
+    <div class="order-panel policy-panel">
+      <div class="order-header">
+        <h3 id="policyTitle">Politică</h3>
+        <button class="order-close" onclick="closePolicy()">✕</button>
+      </div>
+      <div class="order-body policy-body" id="policyBody"></div>
+    </div>
+  </div>
 
   <!-- COȘ FAB -->
   <button class="cart-fab" id="cartFab" onclick="openCart()" style="display:none;" aria-label="Coș cumpărături">
