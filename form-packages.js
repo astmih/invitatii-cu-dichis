@@ -34,6 +34,7 @@ const FORM_PACKAGES = {
         title: '📞 Confirmări',
         fields: [
           { id: 'telefoane', label: 'Numere de telefon pentru confirmari', type: 'text', required: true, fullWidth: true, placeholder: 'ex: 0712 345 678, 0723 456 789' },
+          { id: 'numarTelefon', label: 'Numar de telefon pentru confirmarea comenzii', type: 'tel', required: true, fullWidth: true, placeholder: 'ex: 0712 345 678' },
         ]
       }
     ]
@@ -66,6 +67,7 @@ const FORM_PACKAGES = {
         fields: [
           { id: 'dataLimitaConfirmari', label: 'Data limita confirmari',    type: 'date', required: true },
           { id: 'telefoane',            label: 'Numar de telefon confirmari', type: 'tel', required: true, placeholder: 'ex: 0712 345 678' },
+          { id: 'numarTelefon', label: 'Numar de telefon pentru confirmarea comenzii', type: 'tel', required: true, fullWidth: true, placeholder: 'ex: 0712 345 678' },
         ]
       }
     ]
@@ -79,6 +81,7 @@ const FORM_PACKAGES = {
         title: '📋 Detalii',
         fields: [
           { id: 'numePrenume',            label: 'Nume si prenume',         type: 'text',     required: true,  fullWidth: true, placeholder: 'Numele complet' },
+          { id: 'numarTelefon',           label: 'Numar de telefon pentru confirmarea comenzii', type: 'tel', required: true, fullWidth: true, placeholder: 'ex: 0712 345 678' },
           { id: 'informatiiSuplimentare', label: 'Informatii suplimentare', type: 'textarea', required: false, fullWidth: true, placeholder: 'Orice detalii relevante pentru comandă...' },
         ]
       }
