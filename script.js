@@ -326,12 +326,18 @@ function renderFeedback(list) {
     const rating  = Math.min(5, Math.max(0, parseInt(f.rating) || 5));
     const filled  = '<span class="star-filled">' + '★'.repeat(rating) + '</span>';
     const empty   = rating < 5 ? '<span class="star-empty">' + '☆'.repeat(5 - rating) + '</span>' : '';
+    const replyHtml = f.reply ? `
+      <div class="fb-reply">
+        <span class="fb-reply-label">💬 Răspuns de la Ale:</span>
+        <span class="fb-reply-text">${escHtml(f.reply)}</span>
+      </div>` : '';
     return `
       <div class="feedback-card">
         <span class="fb-quote">❝</span>
         <p class="fb-message">${escHtml(f.message)}</p>
         <div class="fb-stars">${filled}${empty}</div>
         <div class="fb-author">— ${escHtml(f.name)}</div>
+        ${replyHtml}
       </div>`;
   }).join('');
 }

@@ -782,6 +782,7 @@ async function renderAdminFeedbackList() {
       const rating = Math.min(5, Math.max(0, parseInt(f.rating) || 5));
       const stars  = '★'.repeat(rating) + '☆'.repeat(5 - rating);
       const date   = f.createdAt ? new Date(f.createdAt).toLocaleDateString('ro-RO', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      const inputId = 'reply-' + doc.id;
       return `
         <div class="admin-feedback-item">
           <div class="admin-fb-stars">${escHtml(stars)}</div>
@@ -789,6 +790,8 @@ async function renderAdminFeedbackList() {
             <div class="admin-fb-name">${escHtml(f.name || '')}</div>
             <div class="admin-fb-message">${escHtml(f.message || '')}</div>
             ${date ? `<div class="admin-fb-date">${date}</div>` : ''}
+            <textarea id="${inputId}" class="admin-fb-reply-area" rows="2" placeholder="Scrie un răspuns vizibil pe site...">${escHtml(f.reply || '')}</textarea>
+            <button class="btn-fb-reply" onclick="saveFeedbackReply('${doc.id}', '${inputId}')">Salvează Răspuns</button>
           </div>
           <button class="btn-delete" onclick="deleteFeedback('${doc.id}')">Șterge</button>
         </div>`;
@@ -796,6 +799,18 @@ async function renderAdminFeedbackList() {
   } catch (e) {
     el.innerHTML = '<div class="admin-empty">Eroare la încărcarea feedback-ului.</div>';
     console.error('renderAdminFeedbackList:', e);
+  }
+}
+
+async function saveFeedbackReply(id, inputId) {
+  const reply = document.getElementById(inputId).value.trim();
+  try {
+    await db.collection('feedback').doc(id).update({ reply });
+    showToast(reply ? 'Răspuns salvat.' : 'Răspuns șters.');
+    await renderAdminFeedbackList();
+  } catch (e) {
+    showToast('Eroare la salvare.');
+    console.error('saveFeedbackReply:', e);
   }
 }
 
@@ -809,6 +824,18 @@ async function deleteFeedback(id) {
     showToast('Eroare la ștergere. Verifică Firebase.');
     console.error('deleteFeedback:', e);
   }
+}
+
+/* ── IMAGE PREVIEW ── */
+function openAdminImgPreview(src) {
+  const modal = document.getElementById('adminImgPreviewModal');
+  document.getElementById('adminImgPreviewImg').src = src;
+  modal.style.display = 'flex';
+}
+
+function closeAdminImgPreview() {
+  document.getElementById('adminImgPreviewModal').style.display = 'none';
+  document.getElementById('adminImgPreviewImg').src = '';
 }
 
 /* ── UTILS ── */
@@ -855,6 +882,13 @@ async function renderAdminOrderList() {
       badge.style.display = newCount > 0 ? 'inline-flex' : 'none';
     }
 
+    const prodSnap = await db.collection('products').get();
+    const productImgMap = {};
+    prodSnap.forEach(doc => {
+      const imgs = doc.data().images;
+      if (imgs && imgs.length) productImgMap[doc.id] = imgs[0];
+    });
+
     const typeLabel = { nunta: '💍 Nuntă', botez: '👶 Botez', other: '📋 Altele' };
 
     el.innerHTML = orders.map(o => {
@@ -866,7 +900,11 @@ async function renderAdminOrderList() {
 
       const itemsHtml = (o.items || []).map(item => {
         const extrasNote = item.extras && item.extras.length ? ` <span style="color:var(--text-light);font-size:0.78rem;">(${escHtml(item.extras.join(', '))})</span>` : '';
+        const thumb = item.productId && productImgMap[item.productId]
+          ? `<img src="${productImgMap[item.productId]}" class="admin-order-thumb" alt="${escHtml(item.name)}" onclick="openAdminImgPreview(this.src)" />`
+          : '';
         return `<div class="admin-order-product">
+          ${thumb}
           <span>${escHtml(item.name)}${extrasNote} × ${item.qty}</span>
           <span>${(item.subtotal || 0).toFixed(2)} lei</span>
         </div>`;
